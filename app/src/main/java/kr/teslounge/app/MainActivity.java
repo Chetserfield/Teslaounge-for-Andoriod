@@ -16,8 +16,8 @@ import java.util.Locale;
 
 /** Local community prototype with an external TradingView stock widget. */
 public class MainActivity extends Activity {
-    final int ink=0xFFF4F5F7, muted=0xFFA6ADB8, paper=0xFF101113, accent=0xFFE2E4E7;
-    final int surface=0xFF191B1E, field=0xFF292B2F;
+    final int ink=0xFFF3F3F1, muted=0xFF9FA79F, paper=0xFF141617, accent=0xFFD7E2C6;
+    final int surface=0xFF202525, field=0xFF252929;
     final String[] groups={"관심자", "예비 오너", "오너"};
     final String[] categories={"전체","구매·인도 Q&A","오너 생활","지역 모임"};
     final String[] models={"예비 오너","Model Y","Model 3","Model S","Model X","Cybertruck"};
@@ -51,13 +51,13 @@ public class MainActivity extends Activity {
         return p;
     }
     void save(){prefs.edit().putString("posts",posts.toString()).apply();}
-    GradientDrawable bg(int color){GradientDrawable d=new GradientDrawable(); d.setColor(color);d.setCornerRadius(dp(8));return d;}
+    GradientDrawable bg(int color){GradientDrawable d=new GradientDrawable(); d.setColor(color);d.setCornerRadius(dp(12));return d;}
     LinearLayout column(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
     TextView text(String value,int size,int color){TextView t=new TextView(this);t.setText(value);t.setTextSize(size>=26?24:size>=20?19:size>=16?14:size);t.setTextColor(color);t.setFontFeatureSettings("kern");t.setLineSpacing(dp(3),1);t.setPadding(0,dp(5),0,dp(5));return t;}
     void heading(LinearLayout target,String value){TextView t=text(value,23,ink);t.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));t.setPadding(0,dp(14),0,dp(12));target.addView(t);}
-    Button button(String label,Runnable action){Button b=new Button(this);b.setText(label);b.setAllCaps(false);b.setTextSize(14);b.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));b.setTextColor(ink);b.setMinHeight(dp(52));b.setPadding(dp(16),dp(12),dp(16),dp(12));b.setStateListAnimator(null);b.setElevation(0);b.setBackground(new RippleDrawable(ColorStateList.valueOf(0x18FFFFFF),bg(field),null));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(6),0,dp(6));b.setLayoutParams(lp);b.setOnClickListener(v->action.run());return b;}
-    Button primary(String label,Runnable action){Button b=button(label,action);b.setTextColor(0xFF17191E);b.setBackground(new RippleDrawable(ColorStateList.valueOf(0x22000000),bg(0xFFF0F2F5),null));return b;}
-    LinearLayout card(LinearLayout parent){LinearLayout l=column();l.setPadding(dp(22),dp(20),dp(22),dp(20));l.setBackground(bg(surface));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(6),0,dp(8));parent.addView(l,lp);return l;}
+    Button button(String label,Runnable action){Button b=new Button(this);b.setText(label);b.setAllCaps(false);b.setTextSize(13);b.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));b.setTextColor(ink);b.setMinHeight(dp(52));b.setPadding(dp(16),dp(12),dp(16),dp(12));b.setStateListAnimator(null);b.setElevation(0);b.setBackground(new RippleDrawable(ColorStateList.valueOf(0x18FFFFFF),bg(field),null));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(6),0,dp(6));b.setLayoutParams(lp);b.setOnClickListener(v->action.run());return b;}
+    Button primary(String label,Runnable action){Button b=button(label,action);b.setTextColor(0xFF17191E);b.setBackground(new RippleDrawable(ColorStateList.valueOf(0x22000000),bg(accent),null));return b;}
+    LinearLayout card(LinearLayout parent){LinearLayout l=column();l.setPadding(dp(18),dp(16),dp(18),dp(16));l.setBackground(bg(surface));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(6),0,dp(8));parent.addView(l,lp);return l;}
     EditText input(String hint,int max,boolean multi){EditText e=new EditText(this);e.setHint(hint);e.setHintTextColor(0xFF8B95A1);e.setBackground(bg(field));e.setTextColor(ink);e.setTextSize(14);e.setFilters(new InputFilter[]{new InputFilter.LengthFilter(max)});e.setSingleLine(!multi);e.setPadding(dp(16),dp(16),dp(16),dp(16));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.setMargins(0,dp(8),0,dp(8));e.setLayoutParams(lp);if(multi){e.setMinLines(4);e.setGravity(Gravity.TOP);e.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);}return e;}
     void go(String name){tab=name;detail=-1;render();}
     int group(){return Math.max(0,Math.min(2,prefs.getInt("group",0)));}
@@ -66,35 +66,34 @@ public class MainActivity extends Activity {
     }
     void render(){
         releaseStockChart();
-        root=column();root.setBackgroundColor(paper);setContentView(root);
+        root=column();root.setBackgroundColor(paper);ResponsiveFrame window=new ResponsiveFrame(this);window.setBackgroundColor(paper);window.addView(root,new FrameLayout.LayoutParams(-1,-1));setContentView(window);
         root.setOnApplyWindowInsetsListener((v,i)->{root.setPadding(i.getSystemWindowInsetLeft(),i.getSystemWindowInsetTop(),i.getSystemWindowInsetRight(),i.getSystemWindowInsetBottom());return i;});root.requestApplyInsets();
         LinearLayout header=new LinearLayout(this);header.setGravity(Gravity.CENTER_VERTICAL);header.setPadding(dp(24),dp(6),dp(24),dp(8));
         TextView logo=text("TESLOUNGE",16,ink);logo.setTypeface(Typeface.create("sans-serif",Typeface.BOLD));logo.setLetterSpacing(0.16f);header.addView(logo,new LinearLayout.LayoutParams(0,-2,1));
         Button profile=button("MY",()->go("MY"));profile.setTextSize(11);profile.setMinWidth(0);profile.setMinimumWidth(0);profile.setPadding(0,0,0,0);profile.setMinHeight(0);profile.setMinimumHeight(0);profile.setBackground(bg(surface));header.addView(profile,new LinearLayout.LayoutParams(dp(44),dp(44)));root.addView(header);
-        ScrollView scroll=new ScrollView(this);scroll.setClipToPadding(false);scroll.setVerticalScrollBarEnabled(false);body=column();body.setPadding(dp(20),dp(4),dp(20),dp(28));scroll.addView(body);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        ScrollView scroll=new ScrollView(this);scroll.setClipToPadding(false);scroll.setVerticalScrollBarEnabled(false);body=column();body.setPadding(dp(24),dp(4),dp(24),dp(28));scroll.addView(body);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         if(detail>=0 && detail<posts.length())showPost(detail);
         else if(tab.equals("홈"))home();else if(tab.equals("커뮤니티"))community();else if(tab.equals("구매·인도"))guide();
         else if(tab.equals("뉴스")||tab.equals("뉴스·주식"))news();else if(tab.equals("주식"))stock();else if((tab.equals("서비스")||tab.equals("케어")))services();else if(tab.equals("내 차"))vehicle();else garage();
         LinearLayout nav=new LinearLayout(this);nav.setBackgroundColor(paper);nav.setPadding(dp(8),dp(8),dp(8),dp(4));
-        for(String name:tabs()){boolean selected=tab.equals(name)||(tab.equals("주식")&&name.equals("뉴스·주식"));Button b=button(name,()->go(name));b.setTextSize(10);b.setMinWidth(0);b.setMinimumWidth(0);b.setPadding(dp(2),dp(6),dp(2),dp(6));b.setTextColor(selected?ink:muted);b.setBackground(bg(paper));LoungeIcon icon=new LoungeIcon(name,selected?ink:0xFF74777D);icon.setBounds(0,0,dp(23),dp(23));b.setCompoundDrawables(null,icon,null,null);b.setCompoundDrawablePadding(dp(5));nav.addView(b,new LinearLayout.LayoutParams(0,dp(60),1));}root.addView(nav);
+        for(String name:tabs()){boolean selected=tab.equals(name)||(tab.equals("주식")&&name.equals("뉴스·주식"));Button b=button(name,()->go(name));b.setTextSize(10);b.setMinWidth(0);b.setMinimumWidth(0);b.setPadding(dp(2),dp(6),dp(2),dp(6));b.setTextColor(selected?accent:muted);b.setBackground(bg(paper));LoungeIcon icon=new LoungeIcon(name,selected?accent:0xFF747D76);icon.setBounds(0,0,dp(23),dp(23));b.setCompoundDrawables(null,icon,null,null);b.setCompoundDrawablePadding(dp(5));nav.addView(b,new LinearLayout.LayoutParams(0,dp(60),1));}root.addView(nav);
     }
+    void divider(LinearLayout parent){View line=new View(this);line.setBackgroundColor(0xFF303534);parent.addView(line,new LinearLayout.LayoutParams(-1,dp(1)));}
+    Button quiet(String label,Runnable action){Button b=button(label,action);b.setTextSize(12);b.setTextColor(accent);b.setBackground(new RippleDrawable(ColorStateList.valueOf(0x18FFFFFF),bg(paper),null));return b;}
+    LinearLayout editorialRow(LinearLayout parent){LinearLayout row=column();row.setPadding(0,dp(16),0,dp(16));parent.addView(row);return row;}
     void home(){
-        TextView greeting=text("반가워요, "+prefs.getString("nickname","새로운 오너")+"님",13,muted);greeting.setPadding(dp(4),dp(14),0,0);body.addView(greeting);
-        TextView title=text(groups[group()]+"의 라운지",30,ink);title.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));title.setPadding(dp(4),0,0,dp(4));body.addView(title);
-        body.addView(text(group()==2?"차량 연결 준비 중":group()==1?"첫 드라이브를 기다리며":"당신의 다음 드라이브",14,muted));
-        LinearLayout welcome=column();body.addView(welcome);
-        ImageView vehiclePhoto=new ImageView(this);vehiclePhoto.setImageResource(R.drawable.lounge_vehicle);vehiclePhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);vehiclePhoto.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        LinearLayout.LayoutParams photoLayout=new LinearLayout.LayoutParams(-1,dp(230));photoLayout.setMargins(-dp(20),dp(8),-dp(20),0);welcome.addView(vehiclePhoto,photoLayout);
-        TextView photoLabel=text("브랜드 이미지 · 연결된 내 차량이 아니에요",10,muted);photoLabel.setGravity(Gravity.CENTER);welcome.addView(photoLabel);
-        if(group()==2){welcome.addView(text("차량 연결은 준비 중이에요",14,muted));welcome.addView(primary("내 차 보기",()->go("내 차")));}
-        else if(group()==1){welcome.addView(text("인도 준비부터 차근차근 함께해요",14,muted));welcome.addView(primary("출고 준비하기",()->go("구매·인도")));}
-        else{welcome.addView(text("나에게 맞는 이야기부터 만나보세요",14,muted));welcome.addView(primary("관심 설정하기",()->go("MY")));}
-        LinearLayout shortcuts=new LinearLayout(this);shortcuts.setPadding(0,dp(8),0,dp(12));
-        String[] names={"새 소식","이야기","인도 준비"};String[] targets={group()==0?"뉴스":"뉴스·주식","커뮤니티","구매·인도"};String[] icons={"뉴스","커뮤니티","서비스"};
-        for(int i=0;i<names.length;i++){final String target=targets[i];Button quick=button(names[i],()->go(target));quick.setTextSize(13);quick.setMinWidth(0);quick.setMinimumWidth(0);quick.setPadding(dp(4),dp(15),dp(4),dp(15));quick.setBackground(new RippleDrawable(ColorStateList.valueOf(0x18FFFFFF),bg(paper),null));LoungeIcon icon=new LoungeIcon(icons[i],ink);icon.setBounds(0,0,dp(27),dp(27));quick.setCompoundDrawables(null,icon,null,null);quick.setCompoundDrawablePadding(dp(9));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(90),1);lp.setMargins(i==0?0:dp(8),0,0,0);shortcuts.addView(quick,lp);}body.addView(shortcuts);
-        LinearLayout g=card(body);g.addView(text("GET READY",11,muted));TextView guideTitle=text("인도 준비, 하나씩",20,ink);guideTitle.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));g.addView(guideTitle);g.addView(text("준비한 만큼, 첫날이 더 편해져요",14,muted));g.addView(button("내 체크리스트 열기",()->go("구매·인도")));
-        heading(body,"라운지의 새로운 이야기");if(BackendClient.configured())body.addView(button("회원들의 이야기 보기",()->go("커뮤니티")));else for(int i=posts.length()-1;i>=Math.max(0,posts.length()-3);i--)postCard(body,i);
-        body.addView(text(BackendClient.configured()?"공유 커뮤니티 연결 · 프로필 설정과 체크리스트는 이 기기에 저장돼요\nTesla와 독립적으로 운영되는 커뮤니티입니다":"작성 내용은 이 기기에만 저장돼요\nTesla와 독립적으로 운영되는 커뮤니티입니다",11,muted));
+        TextView eyebrow=text("YOUR EVERYDAY, ELECTRIC",10,muted);eyebrow.setLetterSpacing(.12f);eyebrow.setPadding(0,dp(20),0,dp(8));body.addView(eyebrow);
+        TextView title=text("반가워요,\n오늘도 테슬라운지에서.",28,ink);title.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));body.addView(title);
+        ImageView photo=new ImageView(this);photo.setImageResource(R.drawable.lounge_vehicle);photo.setScaleType(ImageView.ScaleType.FIT_CENTER);photo.setContentDescription("테슬라 브랜드 이미지, 연결된 내 차량이 아닙니다");
+        LinearLayout.LayoutParams photoLayout=new LinearLayout.LayoutParams(-1,dp(195));photoLayout.setMargins(-dp(24),0,-dp(24),0);body.addView(photo,photoLayout);
+        body.addView(text("브랜드 이미지 · 차량 연결 전",10,muted));
+        LinearLayout intro=editorialRow(body);intro.addView(text(group()==2?"나의 테슬라 이야기":"나의 테슬라를 소개해주세요",15,ink));intro.addView(text("모델을 등록하고 나에게 맞는 이야기 찾기  ↗",12,muted));intro.setFocusable(true);intro.setContentDescription("내 차량과 관심 설정 열기");intro.setOnClickListener(v->go(group()==2?"내 차":"MY"));divider(body);
+        LinearLayout shortcuts=new LinearLayout(this);shortcuts.setPadding(0,dp(8),0,dp(8));
+        String[] names={"새 소식","출고 가이드","내 차 케어","라운지"},targets={"뉴스·주식","구매·인도","케어","커뮤니티"},icons={"뉴스","내 차","케어","커뮤니티"};
+        for(int i=0;i<names.length;i++){final String target=targets[i];Button b=quiet(names[i],()->go(target));b.setTextSize(10);b.setMinWidth(0);b.setMinimumWidth(0);b.setPadding(dp(2),dp(12),dp(2),dp(12));LoungeIcon icon=new LoungeIcon(icons[i],accent);icon.setBounds(0,0,dp(23),dp(23));b.setCompoundDrawables(null,icon,null,null);b.setCompoundDrawablePadding(dp(10));shortcuts.addView(b,new LinearLayout.LayoutParams(0,dp(82),1));}body.addView(shortcuts);
+        body.addView(text("처음이라면, 여기부터",16,ink));LinearLayout guide=card(body);guide.setBackground(bg(0xFF252E25));TextView label=text("TESLOUNGE GUIDE",10,accent);label.setLetterSpacing(.1f);guide.addView(label);TextView gt=text("설레는 첫 출고,\n차근차근 준비해요.",22,ink);guide.addView(gt);guide.addView(text("인수 체크리스트부터 충전 준비까지  ↗",12,muted));guide.setFocusable(true);guide.setContentDescription("인도 준비 체크리스트 열기");guide.setOnClickListener(v->go("구매·인도"));
+        heading(body,"라운지의 새로운 이야기");body.addView(quiet("회원들의 이야기 보기  ↗",()->go("커뮤니티")));
+        body.addView(text("Tesla와 독립적으로 운영되는 커뮤니티입니다",10,muted));
     }
     void postCard(LinearLayout parent,int id){JSONObject p=posts.optJSONObject(id);if(p==null)return;LinearLayout c=card(parent);c.addView(text(p.optString("category")+(p.optBoolean("sample")?"  ·  예시":""),12,accent));TextView title=text(p.optString("title"),18,ink);title.setTypeface(null,Typeface.BOLD);c.addView(title);TextView excerpt=text(p.optString("text"),14,muted);excerpt.setMaxLines(2);excerpt.setEllipsize(TextUtils.TruncateAt.END);c.addView(excerpt);JSONArray comments=p.optJSONArray("comments");c.addView(text(p.optString("author")+"   ·   공감 "+(p.optBoolean("liked")?1:0)+"   댓글 "+(comments==null?0:comments.length()),12,muted));c.setContentDescription(p.optString("title")+", 글 열기");c.setFocusable(true);c.setOnClickListener(v->{detail=id;render();});}
     void community(){
