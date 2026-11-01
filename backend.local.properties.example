@@ -1,0 +1,4 @@
+# Copy to backend.local.properties (ignored by Git).
+# This is a PUBLIC key, not a service_role or sb_secret_ key.
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_REPLACE_ME

@@ -1,0 +1,1 @@
+{"name":"teslounge-backend-checks","private":true,"type":"module","scripts":{"test":"node --test tests/rls.test.mjs"},"devDependencies":{"@electric-sql/pglite":"0.3.14"}}

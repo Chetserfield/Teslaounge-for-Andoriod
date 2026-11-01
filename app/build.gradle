@@ -11,3 +11,22 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
+
+// Public project configuration only. Server/admin secrets must never enter an APK.
+def backendConfig = new Properties()
+def backendFile = rootProject.file('backend.local.properties')
+if (backendFile.exists()) backendFile.withInputStream { backendConfig.load(it) }
+def backendUrl = backendConfig.getProperty('SUPABASE_URL', '').trim().replaceAll('/+$', '')
+def backendKey = backendConfig.getProperty('SUPABASE_PUBLISHABLE_KEY', '').trim()
+if (backendUrl || backendKey) {
+    if (!(backendUrl ==~ /https:\/\/[a-z0-9-]+\.supabase\.co/) || !backendKey.startsWith('sb_publishable_')) {
+        throw new GradleException('Use a Supabase HTTPS project URL and sb_publishable_ key in backend.local.properties; never a secret/service_role key.')
+    }
+}
+android {
+    buildFeatures { buildConfig true }
+    defaultConfig {
+        buildConfigField 'String', 'SUPABASE_URL', groovy.json.JsonOutput.toJson(backendUrl)
+        buildConfigField 'String', 'SUPABASE_KEY', groovy.json.JsonOutput.toJson(backendKey)
+    }
+}
